@@ -92,9 +92,14 @@
       border-radius: 14px;
       border: 1px solid var(--border);
       background: url('data:image/svg+xml,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M6 9l6 6 6-6" stroke="%235a5c6c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E') no-repeat right 12px center/18px var(--card);
+      background-color: var(--card);
+      color: var(--text-main);
       appearance: none;
     }
 
+    select option {
+      color: var(--text-main);
+    }
     select:disabled {
       opacity: 0.4;
     }
@@ -160,6 +165,7 @@
     .product-card h3 {
       margin: 0;
       font-size: 1rem;
+      color: var(--text-main);
     }
 
     .product-image.no-image {
@@ -227,10 +233,23 @@
       padding: 12px 0;
     }
 
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
     .rule-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
+      table-layout: fixed;
+      min-width: 520px;
+    }
+
+    .rule-table small,
+    .rule-table .discount-note {
+      color: var(--text-sub);
+      font-size: 0.78rem;
     }
 
     .rule-table thead {
@@ -239,10 +258,14 @@
 
     .rule-table th,
     .rule-table td {
-      padding: 12px 10px;
+      padding: 10px 8px;
       border-bottom: 1px solid var(--border);
       text-align: left;
       white-space: nowrap;
+    }
+
+    .rule-table td:last-child {
+      white-space: normal;
     }
 
     .rule-table th:nth-child(1),
@@ -269,7 +292,13 @@
 
   <main>
     <section>
-      <h2>방법 1. 드롭다운 선택</h2>
+      <h2>방법 1. 카드 선택 (사진형)</h2>
+      <p class="helper-text">엑셀에 존재하는 모든 상품/펌프 조합을 카드로 나열했습니다. 카드를 누르면 상품군·상품명·펌프가 자동으로 선택됩니다.</p>
+      <div class="card-grid" id="productCardGrid"></div>
+    </section>
+
+    <section>
+      <h2>방법 2. 드롭다운 선택</h2>
       <div class="select-grid">
         <label class="select-field">
           <span>상품군</span>
@@ -295,31 +324,26 @@
       <p class="helper-text">규정을 따로 고르지 않아도 됩니다. 위 조합에 해당하는 모든 규정(A/P/S/H)이 표로 표시됩니다.</p>
     </section>
 
-    <section>
-      <h2>방법 2. 카드 선택 (사진형)</h2>
-      <p class="helper-text">엑셀에 존재하는 모든 상품/펌프 조합을 카드로 나열했습니다. 카드를 누르면 상품군·상품명·펌프가 자동으로 선택됩니다.</p>
-      <div class="card-grid" id="productCardGrid"></div>
-    </section>
-
     <section id="resultSection">
       <h2>규정별 렌탈 안내</h2>
       <div class="summary-chips" id="summaryChips"></div>
       <div class="result-panel">
         <div class="empty-state" id="emptyState">상품군부터 차례로 선택해 주세요.</div>
         <div id="resultTableWrapper" hidden>
+          <div class="table-wrap">
           <table class="rule-table">
             <thead>
               <tr>
                 <th>규정</th>
                 <th>월 렌탈료</th>
                 <th>연 렌탈료</th>
-                <th>선납 연총액</th>
-                <th>선납 할인액</th>
+                <th>선납 연총액<br><small>(연렌탈료-선납 연총액)</small></th>
               </tr>
             </thead>
             <tbody id="ruleTableBody"></tbody>
           </table>
-          <p class="note-text">* 선납 할인액 = 연 렌탈료 − 선납 연총액</p>
+          </div>
+          <p class="note-text">* 괄호 안 수치는 연렌탈료 − 선납 연총액입니다.</p>
         </div>
       </div>
     </section>
@@ -542,9 +566,9 @@
           const contractSelect = selects.contractMonths;
           if (contractSelect && contractSelect.options.length > 1) {
             contractSelect.focus();
+            contractSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           renderTable();
-          window.scrollTo({ top: document.getElementById('resultSection').offsetTop - 20, behavior: 'smooth' });
         });
 
         cardGrid.appendChild(card);
@@ -625,12 +649,12 @@
       matches.forEach(item => {
         const tr = document.createElement('tr');
         const prepaySave = item.annualFee && item.prepayDiscountTotal ? item.annualFee - item.prepayDiscountTotal : null;
+        const discountDisplay = prepaySave !== null ? `(-${formatter.format(prepaySave)}원)` : '';
         tr.innerHTML = `
-          <td>규정 ${item.rule.toUpperCase()}</td>
+          <td>${item.rule.toUpperCase()}</td>
           <td><strong>${formatter.format(item.rentalFee)}원</strong></td>
           <td>${formatter.format(item.annualFee)}원</td>
-          <td>${formatter.format(item.prepayDiscountTotal)}원</td>
-          <td>${prepaySave !== null ? formatter.format(prepaySave) + '원' : '-'}</td>
+          <td>${formatter.format(item.prepayDiscountTotal)}원${discountDisplay ? '<br><span class="discount-note">' + discountDisplay + '</span>' : ''}</td>
         `;
         tableBody.appendChild(tr);
       });
