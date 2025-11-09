@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>청호 정수기 렌탈 견적</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f7f9;
+      --card: #ffffff;
+      --border: #e2e2e8;
+      --text-main: #101223;
+      --text-sub: #5a5c6c;
+      --accent: #2f80ed;
+      --accent-soft: #e4efff;
+      font-family: 'Pretendard', 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    header {
+      padding: 20px clamp(16px, 4vw, 48px);
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--text-sub);
+      font-size: 0.95rem;
+    }
+
+    main {
+      padding: 24px clamp(16px, 4vw, 48px) 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: clamp(16px, 3vw, 28px);
+      box-shadow: 0 6px 24px rgba(21, 26, 53, 0.06);
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .select-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.92rem;
+    }
+
+    .select-field span {
+      color: var(--text-sub);
+    }
+
+    select {
+      width: 100%;
+      padding: 14px 42px 14px 14px;
+      font-size: 1rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: url('data:image/svg+xml,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M6 9l6 6 6-6" stroke="%235a5c6c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E') no-repeat right 12px center/18px var(--card);
+      appearance: none;
+    }
+
+    select:disabled {
+      opacity: 0.4;
+    }
+
+    .helper-text {
+      margin-top: 12px;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .card-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+    }
+
+    .product-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      transition: border 0.2s ease, transform 0.2s ease;
+      background: linear-gradient(135deg, #f9fbff, #f1f0ff);
+    }
+
+    .product-card[data-hidden="true"] {
+      display: none;
+    }
+
+    .product-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 8px 20px rgba(47, 128, 237, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .product-image {
+      width: 100%;
+      padding-top: 65%;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      background: #fff;
+    }
+
+    .product-image img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.25s ease;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.05);
+    }
+
+    .product-card h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .product-image.no-image {
+      background: repeating-linear-gradient(45deg, #f0f0f5, #f0f0f5 10px, #fafafa 10px, #fafafa 20px);
+    }
+
+    .product-image.no-image::after {
+      content: '이미지 준비중';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .product-card p {
+      margin: 0;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      width: fit-content;
+    }
+
+    .pump-tag {
+      font-size: 0.8rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .summary-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 6px 14px;
+      background: #eff3ff;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+
+    .result-panel {
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      background: #fdfdff;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-sub);
+      padding: 12px 0;
+    }
+
+    .rule-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    .rule-table thead {
+      background: #eef3ff;
+    }
+
+    .rule-table th,
+    .rule-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .rule-table th:nth-child(1),
+    .rule-table td:nth-child(1) {
+      width: 80px;
+    }
+
+    .rule-table td strong {
+      font-size: 1rem;
+    }
+
+    .note-text {
+      margin-top: 8px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>청호 정수기 렌탈 견적</h1>
+    <p>필터(방법 1) 또는 카드(방법 2) 중 한 가지 방식으로 상품군·상품명·펌프·계약/점검 기간을 지정하면 규정별 렌탈 단가가 표로 표시됩니다.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>방법 1. 드롭다운 선택</h2>
+      <div class="select-grid">
+        <label class="select-field">
+          <span>상품군</span>
+          <select data-filter="productGroup"></select>
+        </label>
+        <label class="select-field">
+          <span>상품명</span>
+          <select data-filter="productName" disabled></select>
+        </label>
+        <label class="select-field">
+          <span>펌프 (O/X)</span>
+          <select data-filter="pump" disabled></select>
+        </label>
+        <label class="select-field">
+          <span>계약기간</span>
+          <select data-filter="contractMonths" disabled></select>
+        </label>
+        <label class="select-field">
+          <span>점검기간</span>
+          <select data-filter="inspectionMonths" disabled></select>
+        </label>
+      </div>
+      <p class="helper-text">규정을 따로 고르지 않아도 됩니다. 위 조합에 해당하는 모든 규정(A/P/S/H)이 표로 표시됩니다.</p>
+    </section>
+
+    <section>
+      <h2>방법 2. 카드 선택 (사진형)</h2>
+      <p class="helper-text">엑셀에 존재하는 모든 상품/펌프 조합을 카드로 나열했습니다. 카드를 누르면 상품군·상품명·펌프가 자동으로 선택됩니다.</p>
+      <div class="card-grid" id="productCardGrid"></div>
+    </section>
+
+    <section id="resultSection">
+      <h2>규정별 렌탈 안내</h2>
+      <div class="summary-chips" id="summaryChips"></div>
+      <div class="result-panel">
+        <div class="empty-state" id="emptyState">상품군부터 차례로 선택해 주세요.</div>
+        <div id="resultTableWrapper" hidden>
+          <table class="rule-table">
+            <thead>
+              <tr>
+                <th>규정</th>
+                <th>월 렌탈료</th>
+                <th>연 렌탈료</th>
+                <th>선납 연총액</th>
+                <th>선납 할인액</th>
+              </tr>
+            </thead>
+            <tbody id="ruleTableBody"></tbody>
+          </table>
+          <p class="note-text">* 선납 할인액 = 연 렌탈료 − 선납 연총액</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>window.__PRICING__ = [{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":6,"rentalFee":54900,"annualFee":658800,"prepayDiscountTotal":592920,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":6,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":6,"rentalFee":49900,"annualFee":598800,"prepayDiscountTotal":538920,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":6,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":12,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":12,"rentalFee":43900,"annualFee":526800,"prepayDiscountTotal":474120,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":6,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":6,"rentalFee":48900,"annualFee":586800,"prepayDiscountTotal":528120,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":12,"rentalFee":48900,"annualFee":586800,"prepayDiscountTotal":528120,"promotion":""},{"productGroup":"얼음정수기","productName":"뉴아이스트리","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":12,"rentalFee":45900,"annualFee":550800,"prepayDiscountTotal":495720,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":56900,"annualFee":682800,"prepayDiscountTotal":614520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":48900,"annualFee":586800,"prepayDiscountTotal":528120,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":48900,"annualFee":586800,"prepayDiscountTotal":528120,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":52900,"annualFee":634800,"prepayDiscountTotal":571320,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":4,"rentalFee":49900,"annualFee":598800,"prepayDiscountTotal":538920,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":49900,"annualFee":598800,"prepayDiscountTotal":538920,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":4,"rentalFee":47900,"annualFee":574800,"prepayDiscountTotal":517320,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":54900,"annualFee":658800,"prepayDiscountTotal":592920,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":49900,"annualFee":598800,"prepayDiscountTotal":538920,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":49900,"annualFee":598800,"prepayDiscountTotal":538920,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":44900,"annualFee":538800,"prepayDiscountTotal":484920,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":50900,"annualFee":610800,"prepayDiscountTotal":549720,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":47900,"annualFee":574800,"prepayDiscountTotal":517320,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":47900,"annualFee":574800,"prepayDiscountTotal":517320,"promotion":""},{"productGroup":"얼음정수기","productName":"550","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":45900,"annualFee":550800,"prepayDiscountTotal":495720,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":61900,"annualFee":742800,"prepayDiscountTotal":668520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":58900,"annualFee":706800,"prepayDiscountTotal":636120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":59900,"annualFee":718800,"prepayDiscountTotal":646920,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":56900,"annualFee":682800,"prepayDiscountTotal":614520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":56900,"annualFee":682800,"prepayDiscountTotal":614520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":54900,"annualFee":658800,"prepayDiscountTotal":592920,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":58900,"annualFee":706800,"prepayDiscountTotal":636120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":4,"rentalFee":55900,"annualFee":670800,"prepayDiscountTotal":603720,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":56900,"annualFee":682800,"prepayDiscountTotal":614520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":4,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":58900,"annualFee":706800,"prepayDiscountTotal":636120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":55900,"annualFee":670800,"prepayDiscountTotal":603720,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":56900,"annualFee":682800,"prepayDiscountTotal":614520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":50900,"annualFee":610800,"prepayDiscountTotal":549720,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":51900,"annualFee":622800,"prepayDiscountTotal":560520,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":48900,"annualFee":586800,"prepayDiscountTotal":528120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":55900,"annualFee":670800,"prepayDiscountTotal":603720,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":4,"rentalFee":52900,"annualFee":634800,"prepayDiscountTotal":571320,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"700","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":4,"rentalFee":50900,"annualFee":610800,"prepayDiscountTotal":549720,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":67900,"annualFee":814800,"prepayDiscountTotal":733320,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":63900,"annualFee":766800,"prepayDiscountTotal":690120,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":65900,"annualFee":790800,"prepayDiscountTotal":711720,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":61900,"annualFee":742800,"prepayDiscountTotal":668520,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":59900,"annualFee":718800,"prepayDiscountTotal":646920,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":55900,"annualFee":670800,"prepayDiscountTotal":603720,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":57900,"annualFee":694800,"prepayDiscountTotal":625320,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":53900,"annualFee":646800,"prepayDiscountTotal":582120,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":62900,"annualFee":754800,"prepayDiscountTotal":679320,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":4,"rentalFee":58900,"annualFee":706800,"prepayDiscountTotal":636120,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":60900,"annualFee":730800,"prepayDiscountTotal":657720,"promotion":""},{"productGroup":"얼음정수기","productName":"슈퍼아이스트리","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":4,"rentalFee":56900,"annualFee":682800,"prepayDiscountTotal":614520,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":35900,"annualFee":430800,"prepayDiscountTotal":387720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":3,"rentalFee":34900,"annualFee":418800,"prepayDiscountTotal":376920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":6,"rentalFee":31900,"annualFee":382800,"prepayDiscountTotal":344520,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":34900,"annualFee":418800,"prepayDiscountTotal":376920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":3,"rentalFee":33900,"annualFee":406800,"prepayDiscountTotal":366120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":6,"rentalFee":30900,"annualFee":370800,"prepayDiscountTotal":333720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":29900,"annualFee":358800,"prepayDiscountTotal":322920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":3,"rentalFee":28900,"annualFee":346800,"prepayDiscountTotal":312120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":6,"rentalFee":25900,"annualFee":310800,"prepayDiscountTotal":279720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":28900,"annualFee":346800,"prepayDiscountTotal":312120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":3,"rentalFee":27900,"annualFee":334800,"prepayDiscountTotal":301320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":6,"rentalFee":24900,"annualFee":298800,"prepayDiscountTotal":268920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":30900,"annualFee":370800,"prepayDiscountTotal":333720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":3,"rentalFee":29900,"annualFee":358800,"prepayDiscountTotal":322920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":6,"rentalFee":26900,"annualFee":322800,"prepayDiscountTotal":290520,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":29900,"annualFee":358800,"prepayDiscountTotal":322920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":3,"rentalFee":28900,"annualFee":346800,"prepayDiscountTotal":312120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":6,"rentalFee":25900,"annualFee":310800,"prepayDiscountTotal":279720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"h","contractMonths":36,"inspectionMonths":3,"rentalFee":26900,"annualFee":322800,"prepayDiscountTotal":290520,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"h","contractMonths":36,"inspectionMonths":6,"rentalFee":23900,"annualFee":286800,"prepayDiscountTotal":258120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"h","contractMonths":60,"inspectionMonths":3,"rentalFee":23900,"annualFee":286800,"prepayDiscountTotal":258120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"o","rule":"h","contractMonths":60,"inspectionMonths":6,"rentalFee":20900,"annualFee":250800,"prepayDiscountTotal":225720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":34900,"annualFee":418800,"prepayDiscountTotal":376920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":3,"rentalFee":33900,"annualFee":406800,"prepayDiscountTotal":366120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":6,"rentalFee":30900,"annualFee":370800,"prepayDiscountTotal":333720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":33900,"annualFee":406800,"prepayDiscountTotal":366120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":3,"rentalFee":32900,"annualFee":394800,"prepayDiscountTotal":355320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":6,"rentalFee":29900,"annualFee":358800,"prepayDiscountTotal":322920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":28900,"annualFee":346800,"prepayDiscountTotal":312120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":3,"rentalFee":27900,"annualFee":334800,"prepayDiscountTotal":301320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":6,"rentalFee":24900,"annualFee":298800,"prepayDiscountTotal":268920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":27900,"annualFee":334800,"prepayDiscountTotal":301320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":3,"rentalFee":26900,"annualFee":322800,"prepayDiscountTotal":290520,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":6,"rentalFee":23900,"annualFee":286800,"prepayDiscountTotal":258120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":29900,"annualFee":358800,"prepayDiscountTotal":322920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":3,"rentalFee":28900,"annualFee":346800,"prepayDiscountTotal":312120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":6,"rentalFee":25900,"annualFee":310800,"prepayDiscountTotal":279720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":28900,"annualFee":346800,"prepayDiscountTotal":312120,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":3,"rentalFee":27900,"annualFee":334800,"prepayDiscountTotal":301320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":6,"rentalFee":24900,"annualFee":298800,"prepayDiscountTotal":268920,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"h","contractMonths":36,"inspectionMonths":3,"rentalFee":25900,"annualFee":310800,"prepayDiscountTotal":279720,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"h","contractMonths":36,"inspectionMonths":6,"rentalFee":22900,"annualFee":274800,"prepayDiscountTotal":247320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"h","contractMonths":60,"inspectionMonths":3,"rentalFee":22900,"annualFee":274800,"prepayDiscountTotal":247320,"promotion":""},{"productGroup":"냉온정수기","productName":"토타","pump":"x","rule":"h","contractMonths":60,"inspectionMonths":6,"rentalFee":19900,"annualFee":238800,"prepayDiscountTotal":214920,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":48900,"annualFee":586800,"prepayDiscountTotal":528120,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":44900,"annualFee":538800,"prepayDiscountTotal":484920,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":47900,"annualFee":574800,"prepayDiscountTotal":517320,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":43900,"annualFee":526800,"prepayDiscountTotal":474120,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":43900,"annualFee":526800,"prepayDiscountTotal":474120,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":39900,"annualFee":478800,"prepayDiscountTotal":430920,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":40900,"annualFee":490800,"prepayDiscountTotal":441720,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":36900,"annualFee":442800,"prepayDiscountTotal":398520,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":44900,"annualFee":538800,"prepayDiscountTotal":484920,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"s","contractMonths":36,"inspectionMonths":4,"rentalFee":40900,"annualFee":490800,"prepayDiscountTotal":441720,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":41900,"annualFee":502800,"prepayDiscountTotal":452520,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"x","rule":"s","contractMonths":60,"inspectionMonths":4,"rentalFee":37900,"annualFee":454800,"prepayDiscountTotal":409320,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":2,"rentalFee":50900,"annualFee":610800,"prepayDiscountTotal":549720,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"a","contractMonths":36,"inspectionMonths":4,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":2,"rentalFee":49900,"annualFee":598800,"prepayDiscountTotal":538920,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"a","contractMonths":60,"inspectionMonths":4,"rentalFee":45900,"annualFee":550800,"prepayDiscountTotal":495720,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":2,"rentalFee":45900,"annualFee":550800,"prepayDiscountTotal":495720,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"p","contractMonths":36,"inspectionMonths":4,"rentalFee":41900,"annualFee":502800,"prepayDiscountTotal":452520,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":2,"rentalFee":42900,"annualFee":514800,"prepayDiscountTotal":463320,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"p","contractMonths":60,"inspectionMonths":4,"rentalFee":38900,"annualFee":466800,"prepayDiscountTotal":420120,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":2,"rentalFee":46900,"annualFee":562800,"prepayDiscountTotal":506520,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"s","contractMonths":36,"inspectionMonths":4,"rentalFee":42900,"annualFee":514800,"prepayDiscountTotal":463320,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":2,"rentalFee":43900,"annualFee":526800,"prepayDiscountTotal":474120,"promotion":""},{"productGroup":"냉온정수기","productName":"메타디지털","pump":"o","rule":"s","contractMonths":60,"inspectionMonths":4,"rentalFee":39900,"annualFee":478800,"prepayDiscountTotal":430920,"promotion":""}];</script>
+  <script>
+    const filterOrder = ['productGroup', 'productName', 'pump', 'contractMonths', 'inspectionMonths'];
+    const placeholders = {
+      productGroup: '상품군 선택',
+      productName: '상품명 선택',
+      pump: '펌프 선택',
+      contractMonths: '계약기간 선택',
+      inspectionMonths: '점검기간 선택'
+    };
+
+    const IMAGE_BASE = 'https://chungho.co.kr/newch/uploads/';
+
+    const productMeta = {
+      '뉴아이스트리': {
+        title: '뉴 아이스트리',
+        subtitle: '얼음정수기',
+        accent: '#ffdada',
+        image: `${IMAGE_BASE}nic_p_iwc_Thumbnail[2].jpg`
+      },
+      '550': {
+        title: '550',
+        subtitle: '얼음정수기',
+        accent: '#e7f0ff',
+        image: `${IMAGE_BASE}550_Th_블루블랙[1].jpg`
+      },
+      '700': {
+        title: 'NEW 700',
+        subtitle: '얼음정수기',
+        accent: '#fff5d6',
+        image: `${IMAGE_BASE}700_tt_Thumbnail[0].jpg`
+      },
+      '슈퍼아이스트리': {
+        title: '슈퍼 아이스트리',
+        subtitle: '냉온정수기',
+        accent: '#f1e6ff',
+        image: `${IMAGE_BASE}SIT_b_iwc_Thumbnail[0].jpg`
+      },
+      '메타디지털': {
+        title: '메타 디지털',
+        subtitle: '냉온정수기',
+        accent: '#e2ffe9',
+        image: `${IMAGE_BASE}meta_Thumbnail.jpg`
+      },
+      '토타': {
+        title: '토타 (TOTA)',
+        subtitle: '냉온정수기',
+        accent: '#fde5ff',
+        image: `${IMAGE_BASE}TOTA_Thumbnail[0].jpg`
+      }
+    };
+
+    const selects = {};
+    const filters = {
+      productGroup: '',
+      productName: '',
+      pump: '',
+      contractMonths: '',
+      inspectionMonths: ''
+    };
+
+    const pricingData = Array.isArray(window.__PRICING__) ? window.__PRICING__ : [];
+    const cardGrid = document.getElementById('productCardGrid');
+    const summaryChips = document.getElementById('summaryChips');
+    const emptyState = document.getElementById('emptyState');
+    const tableWrapper = document.getElementById('resultTableWrapper');
+    const tableBody = document.getElementById('ruleTableBody');
+
+    document.querySelectorAll('select[data-filter]').forEach(select => {
+      const key = select.dataset.filter;
+      selects[key] = select;
+      select.addEventListener('change', () => {
+        filters[key] = select.value;
+        const startIndex = filterOrder.indexOf(key);
+        filterOrder.slice(startIndex + 1).forEach(nextKey => filters[nextKey] = '');
+        refreshSelects();
+        highlightCard();
+        updateSummary();
+        renderTable();
+      });
+    });
+
+    if (pricingData.length) {
+      refreshSelects();
+      buildProductCards();
+      updateSummary();
+    } else {
+      emptyState.textContent = '데이터를 불러오지 못했습니다. data/pricing.js를 확인하세요.';
+    }
+
+    function refreshSelects() {
+      let workingSet = pricingData.slice();
+
+      filterOrder.forEach((key) => {
+        const select = selects[key];
+        const available = Array.from(new Set(workingSet.map(item => mapValue(item, key)).filter(Boolean)));
+        populateSelect(select, available, placeholders[key]);
+
+        if (filters[key] && available.includes(filters[key])) {
+          select.value = filters[key];
+          select.disabled = false;
+          workingSet = workingSet.filter(item => mapValue(item, key) === filters[key]);
+        } else if (filters[key]) {
+          filters[key] = '';
+          select.value = '';
+        }
+
+        select.disabled = available.length === 0;
+      });
+    }
+
+    function populateSelect(select, values, placeholder) {
+      const fragment = document.createDocumentFragment();
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = placeholder;
+      fragment.appendChild(defaultOption);
+
+      values.slice().sort((a, b) => a.localeCompare(b, 'ko', { numeric: true })).forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = formatLabel(value, select.dataset.filter);
+        fragment.appendChild(option);
+      });
+
+      select.innerHTML = '';
+      select.appendChild(fragment);
+    }
+
+    function mapValue(item, key) {
+      const propMap = {
+        productGroup: 'productGroup',
+        productName: 'productName',
+        pump: 'pump',
+        contractMonths: 'contractMonths',
+        inspectionMonths: 'inspectionMonths'
+      };
+      const raw = item[propMap[key]];
+      return raw === undefined || raw === null ? '' : String(raw);
+    }
+
+    function formatLabel(value, key) {
+      if (!value) return placeholders[key];
+      switch (key) {
+        case 'pump':
+          return value === 'o' ? '펌프 O' : '펌프 X';
+        case 'contractMonths':
+        case 'inspectionMonths':
+          return `${value}개월`;
+        default:
+          return value;
+      }
+    }
+
+    function buildProductCards() {
+      const combos = new Map();
+      pricingData.forEach(item => {
+        const key = `${item.productName}|${item.pump}`;
+        if (!combos.has(key)) {
+          combos.set(key, { group: item.productGroup, name: item.productName, pump: item.pump });
+        }
+      });
+
+      combos.forEach(({ group, name, pump }) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'product-card';
+        card.dataset.product = name;
+        card.dataset.group = group;
+        card.dataset.pump = pump;
+
+        const meta = productMeta[name] || { title: name, subtitle: group, accent: '#f1f5ff' };
+        card.style.background = `linear-gradient(135deg, ${meta.accent || '#f1f5ff'}, #ffffff)`;
+
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = group;
+
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'product-image';
+        const img = document.createElement('img');
+        let imageSrc = meta.image || '';
+        if (imageSrc) {
+          imageSrc = encodeURI(imageSrc).replace(/\[/g, '%5B').replace(/\]/g, '%5D');
+          img.src = imageSrc;
+          img.alt = `${meta.title || name} 이미지`;
+        } else {
+          imgWrap.classList.add('no-image');
+        }
+        imgWrap.appendChild(img);
+
+        const title = document.createElement('h3');
+        title.textContent = meta.title || name;
+
+        const subtitle = document.createElement('p');
+        subtitle.textContent = meta.subtitle || '';
+
+        const pumpTag = document.createElement('span');
+        pumpTag.className = 'pump-tag';
+        pumpTag.textContent = pump === 'o' ? '펌프 O 모델' : '펌프 X 모델';
+
+        card.appendChild(badge);
+        card.appendChild(imgWrap);
+        card.appendChild(title);
+        card.appendChild(subtitle);
+        card.appendChild(pumpTag);
+
+        card.addEventListener('click', () => {
+          filters.productGroup = group;
+          filters.productName = name;
+          filters.pump = pump;
+          refreshSelects();
+          highlightCard(`${name}|${pump}`);
+          updateSummary();
+          const contractSelect = selects.contractMonths;
+          if (contractSelect && contractSelect.options.length > 1) {
+            contractSelect.focus();
+          }
+          renderTable();
+          window.scrollTo({ top: document.getElementById('resultSection').offsetTop - 20, behavior: 'smooth' });
+        });
+
+        cardGrid.appendChild(card);
+      });
+
+      highlightCard();
+    }
+
+    function highlightCard(activeKey) {
+      const selectedGroup = filters.productGroup;
+      const targetKey = activeKey || (filters.productName && filters.pump ? `${filters.productName}|${filters.pump}` : '');
+      cardGrid.querySelectorAll('.product-card').forEach(card => {
+        const matchGroup = !selectedGroup || card.dataset.group === selectedGroup;
+        card.dataset.hidden = matchGroup ? 'false' : 'true';
+        const isActive = targetKey && targetKey === `${card.dataset.product}|${card.dataset.pump}`;
+        card.classList.toggle('active', isActive);
+      });
+    }
+
+    function updateSummary() {
+      summaryChips.innerHTML = '';
+      const labels = {
+        productGroup: '상품군',
+        productName: '상품명',
+        pump: '펌프',
+        contractMonths: '계약',
+        inspectionMonths: '점검'
+      };
+
+      filterOrder.forEach(key => {
+        if (filters[key]) {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = `${labels[key]} · ${formatLabel(filters[key], key)}`;
+          summaryChips.appendChild(chip);
+        }
+      });
+
+      if (!summaryChips.childElementCount) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = '선택 대기 중';
+        summaryChips.appendChild(chip);
+      }
+    }
+
+    function renderTable() {
+      const ready = filterOrder.every(key => filters[key]);
+      if (!ready) {
+        tableWrapper.hidden = true;
+        emptyState.style.display = 'block';
+        emptyState.textContent = '모든 항목을 선택하면 규정별 금액을 볼 수 있습니다.';
+        tableBody.innerHTML = '';
+        return;
+      }
+
+      const matches = pricingData.filter(item =>
+        filters.productGroup === String(item.productGroup) &&
+        filters.productName === String(item.productName) &&
+        filters.pump === String(item.pump) &&
+        Number(filters.contractMonths) === Number(item.contractMonths) &&
+        Number(filters.inspectionMonths) === Number(item.inspectionMonths)
+      );
+
+      if (!matches.length) {
+        tableWrapper.hidden = true;
+        emptyState.style.display = 'block';
+        emptyState.textContent = '해당 조합의 데이터가 없습니다. 다른 점검/계약 기간을 선택해 주세요.';
+        tableBody.innerHTML = '';
+        return;
+      }
+
+      const formatter = new Intl.NumberFormat('ko-KR');
+      const priority = { a: 1, p: 2, s: 3, h: 4 };
+      matches.sort((a, b) => (priority[a.rule] || 99) - (priority[b.rule] || 99));
+
+      tableBody.innerHTML = '';
+      matches.forEach(item => {
+        const tr = document.createElement('tr');
+        const prepaySave = item.annualFee && item.prepayDiscountTotal ? item.annualFee - item.prepayDiscountTotal : null;
+        tr.innerHTML = `
+          <td>규정 ${item.rule.toUpperCase()}</td>
+          <td><strong>${formatter.format(item.rentalFee)}원</strong></td>
+          <td>${formatter.format(item.annualFee)}원</td>
+          <td>${formatter.format(item.prepayDiscountTotal)}원</td>
+          <td>${prepaySave !== null ? formatter.format(prepaySave) + '원' : '-'}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      tableWrapper.hidden = false;
+      emptyState.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
